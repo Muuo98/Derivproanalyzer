@@ -5,7 +5,7 @@
 :root {
   font-family: Inter, 'Segoe UI', sans-serif;
   color: #e5edf9;
-  background: linear-gradient(180deg, #071421 0%, #0e1b2a 100%);
+  background: linear-gradient(180deg, #071421 0%, #0d1724 100%);
   line-height: 1.5;
   font-weight: 500;
   font-synthesis: none;
@@ -16,6 +16,10 @@
 
 * {
   box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
@@ -33,7 +37,7 @@ select {
 .app-shell {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 32px 20px 36px;
+  padding: 30px 20px 38px;
 }
 
 .topbar,
@@ -53,16 +57,16 @@ select {
 }
 
 .eyebrow {
-  margin: 0 0 4px;
+  margin: 0 0 6px;
   text-transform: uppercase;
   letter-spacing: 0.12em;
   font-size: 0.7rem;
-  color: #8fa9c8;
+  color: #91abc7;
 }
 
 h1 {
   margin: 0;
-  font-size: clamp(2rem, 4vw, 3rem);
+  font-size: clamp(2rem, 4vw, 3.2rem);
 }
 
 .status-pill,
@@ -121,18 +125,21 @@ h1 {
 }
 
 .stat-card span,
-.label {
+.label,
+.mini-metrics span {
   color: #a6bdd8;
   font-size: 0.75rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
-.stat-card strong {
-  font-size: clamp(1.6rem, 3vw, 2.2rem);
+.stat-card strong,
+.mini-metrics strong {
+  font-size: clamp(1.7rem, 3vw, 2.2rem);
 }
 
-.stat-card small {
+.stat-card small,
+.mini-metrics small {
   color: #c9d9ee;
 }
 
@@ -143,7 +150,7 @@ h1 {
 
 .panel-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(330px, 1fr));
   gap: 20px;
   margin-bottom: 20px;
 }
@@ -162,7 +169,8 @@ h1 {
   margin-bottom: 14px;
 }
 
-.panel-header h2 {
+.panel-header h2,
+.panel-subheader h3 {
   margin: 0;
   font-size: 1.1rem;
 }
@@ -183,6 +191,61 @@ h1 {
 .prediction-box p {
   margin: 0;
   color: #d4e3f6;
+}
+
+.mini-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.mini-metrics div {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  border-radius: 12px;
+  padding: 14px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.pills-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.pill-box {
+  min-width: 120px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  background: rgba(82, 170, 255, 0.08);
+  border: 1px solid rgba(91, 183, 255, 0.18);
+  border-radius: 12px;
+  padding: 12px 14px;
+}
+
+.pill-box.cold {
+  background: rgba(255, 186, 90, 0.08);
+  border-color: rgba(255, 186, 90, 0.15);
+}
+
+.pill-box span {
+  color: #a9c6df;
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.pill-box strong {
+  font-size: 1.2rem;
+}
+
+.panel-subheader {
+  margin: 12px 0 10px;
 }
 
 .bar-list {
@@ -215,6 +278,10 @@ h1 {
   height: 100%;
   background: linear-gradient(90deg, #5bb7ff 0%, #a77ef7 100%);
   border-radius: inherit;
+}
+
+.recent-panel {
+  margin-top: 20px;
 }
 
 .table-wrap {
@@ -277,5 +344,9 @@ thead th {
     align-items: flex-start;
     flex-direction: column;
     gap: 12px;
+  }
+
+  .mini-metrics {
+    grid-template-columns: 1fr;
   }
 }
