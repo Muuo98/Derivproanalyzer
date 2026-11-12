@@ -1,0 +1,244 @@
+import { useMemo, useState } from 'react';
+
+const demoTicks = [
+  { id: 1, digit: 4, result: 'matches' },
+  { id: 2, digit: 7, result: 'differs' },
+  { id: 3, digit: 8, result: 'matches' },
+  { id: 4, digit: 1, result: 'differs' },
+  { id: 5, digit: 3, result: 'matches' },
+  { id: 6, digit: 9, result: 'differs' },
+  { id: 7, digit: 2, result: 'matches' },
+  { id: 8, digit: 5, result: 'differs' },
+  { id: 9, digit: 6, result: 'matches' },
+  { id: 10, digit: 0, result: 'differs' },
+  { id: 11, digit: 1, result: 'matches' },
+  { id: 12, digit: 6, result: 'differs' },
+  { id: 13, digit: 4, result: 'matches' },
+  { id: 14, digit: 9, result: 'differs' },
+  { id: 15, digit: 7, result: 'matches' },
+  { id: 16, digit: 0, result: 'differs' },
+  { id: 17, digit: 5, result: 'matches' },
+  { id: 18, digit: 2, result: 'differs' },
+  { id: 19, digit: 3, result: 'matches' },
+  { id: 20, digit: 8, result: 'differs' },
+  { id: 21, digit: 4, result: 'matches' },
+  { id: 22, digit: 5, result: 'differs' },
+  { id: 23, digit: 1, result: 'matches' },
+  { id: 24, digit: 9, result: 'differs' },
+  { id: 25, digit: 6, result: 'matches' },
+  { id: 26, digit: 2, result: 'differs' },
+  { id: 27, digit: 0, result: 'matches' },
+  { id: 28, digit: 8, result: 'differs' },
+  { id: 29, digit: 7, result: 'matches' },
+  { id: 30, digit: 3, result: 'differs' },
+  { id: 31, digit: 5, result: 'matches' },
+  { id: 32, digit: 9, result: 'differs' },
+  { id: 33, digit: 1, result: 'matches' },
+  { id: 34, digit: 4, result: 'differs' },
+  { id: 35, digit: 8, result: 'matches' },
+  { id: 36, digit: 0, result: 'differs' },
+  { id: 37, digit: 6, result: 'matches' },
+  { id: 38, digit: 2, result: 'differs' },
+  { id: 39, digit: 7, result: 'matches' },
+  { id: 40, digit: 5, result: 'differs' }
+];
+
+function getCounts(items) {
+  const counts = Array.from({ length: 10 }, (_, index) => ({
+    digit: index,
+    count: 0,
+    matchRate: 0,
+    differRate: 0
+  }));
+
+  items.forEach((item) => {
+    const index = item.digit;
+    counts[index].count += 1;
+    if (item.result === 'matches') {
+      counts[index].matchRate += 1;
+    } else {
+      counts[index].differRate += 1;
+    }
+  });
+
+  return counts.map((entry) => ({
+    ...entry,
+    matchRate: entry.count ? (entry.matchRate / entry.count) * 100 : 0,
+    differRate: entry.count ? (entry.differRate / entry.count) * 100 : 0
+  }));
+}
+
+function App() {
+  const [windowSize, setWindowSize] = useState(20);
+  const [marketBias, setMarketBias] = useState('matches');
+
+  const view = useMemo(() => {
+    const recent = demoTicks.slice(-windowSize);
+    const matchCount = recent.filter((tick) => tick.result === 'matches').length;
+    const differCount = recent.filter((tick) => tick.result === 'differs').length;
+    const matchRate = (matchCount / recent.length) * 100;
+    const differRate = (differCount / recent.length) * 100;
+    const lastResult = recent[recent.length - 1]?.result ?? 'matches';
+    const lastDigit = recent[recent.length - 1]?.digit ?? 0;
+    const digitStats = getCounts(recent);
+    const strongestDigit = [...digitStats].sort((a, b) => b.count - a.count)[0];
+
+    const biasScore =
+      marketBias === 'matches'
+        ? matchRate - differRate + (lastResult === 'matches' ? 8 : -8)
+        : differRate - matchRate + (lastResult === 'differs' ? 8 : -8);
+
+    const confidence = Math.min(96, Math.max(52, Math.round(Math.abs(biasScore) * 2.8 + 55)));
+    const projectedSignal = biasScore >= 0 ? 'Bullish' : 'Cooling';
+    const finalDecision = biasScore >= 0 ? marketBias : marketBias === 'matches' ? 'differs' : 'matches';
+
+    return {
+      recent,
+      matchRate,
+      differRate,
+      matchCount,
+      differCount,
+      biasScore,
+      confidence,
+      projectedSignal,
+      finalDecision,
+      lastResult,
+      lastDigit,
+      strongestDigit,
+      digitStats
+    };
+  }, [windowSize, marketBias]);
+
+  return (
+    <div className="app-shell">
+      <header className="topbar">
+        <div>
+          <p className="eyebrow">Trading Signal</p>
+          <h1>Derivproanalyzer</h1>
+        </div>
+        <div className="status-pill">Demo mode</div>
+      </header>
+
+      <section className="toolbar">
+        <label>
+          Sample window
+          <select value={windowSize} onChange={(e) => setWindowSize(Number(e.target.value))}>
+            <option value={10}>10 ticks</option>
+            <option value={20}>20 ticks</option>
+            <option value={30}>30 ticks</option>
+            <option value={40}>40 ticks</option>
+          </select>
+        </label>
+
+        <label>
+          Bias focus
+          <select value={marketBias} onChange={(e) => setMarketBias(e.target.value)}>
+            <option value="matches">Matches</option>
+            <option value="differs">Differs</option>
+          </select>
+        </label>
+      </section>
+
+      <section className="stats-grid">
+        <article className="stat-card accent-blue">
+          <span>Match rate</span>
+          <strong>{view.matchRate.toFixed(1)}%</strong>
+          <small>{view.matchCount}/{view.recent.length} ticks</small>
+        </article>
+
+        <article className="stat-card accent-amber">
+          <span>Differ rate</span>
+          <strong>{view.differRate.toFixed(1)}%</strong>
+          <small>{view.differCount}/{view.recent.length} ticks</small>
+        </article>
+
+        <article className="stat-card accent-green">
+          <span>Signal</span>
+          <strong>{view.projectedSignal}</strong>
+          <small>Bias score {view.biasScore.toFixed(1)}</small>
+        </article>
+
+        <article className="stat-card accent-violet">
+          <span>Confidence</span>
+          <strong>{view.confidence}%</strong>
+          <small>Last digit {view.lastDigit}</small>
+        </article>
+      </section>
+
+      <section className="panel-grid">
+        <div className="panel">
+          <div className="panel-header">
+            <h2>Prediction</h2>
+            <span className="chip">{view.finalDecision}</span>
+          </div>
+
+          <div className="prediction-box">
+            <p className="label">Projected next move</p>
+            <h3>{view.finalDecision.toUpperCase()}</h3>
+            <p>
+              The model leans toward <strong>{view.finalDecision}</strong> because the recent cycle
+              is favoring <strong>{view.projectedSignal.toLowerCase()}</strong> momentum and the
+              strongest current digit cluster is {view.strongestDigit.digit}.
+            </p>
+          </div>
+        </div>
+
+        <div className="panel">
+          <div className="panel-header">
+            <h2>Digit intensity</h2>
+          </div>
+
+          <div className="bar-list">
+            {view.digitStats.map((entry) => (
+              <div key={entry.digit} className="bar-row">
+                <div className="bar-label">
+                  <span>{entry.digit}</span>
+                </div>
+                <div className="bar-track">
+                  <div className="bar-fill" style={{ width: `${(entry.count / view.recent.length) * 100}%` }} />
+                </div>
+                <small>{entry.count}</small>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="panel">
+        <div className="panel-header">
+          <h2>Recent outcomes</h2>
+        </div>
+
+        <div className="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Digit</th>
+                <th>Result</th>
+              </tr>
+            </thead>
+            <tbody>
+              {view.recent.slice().reverse().map((tick) => (
+                <tr key={tick.id}>
+                  <td>{tick.id}</td>
+                  <td>{tick.digit}</td>
+                  <td>
+                    <span className={`result-badge ${tick.result}`}>{tick.result}</span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <footer className="footnote">
+        This is a demo analytics model for education and research. It does not guarantee trading
+        outcomes and should not be treated as a profit system.
+      </footer>
+    </div>
+  );
+}
+
+export default App;
